@@ -1,4 +1,5 @@
 import models from '../database/models';
+import { ModelHelpers, Response } from '../helpers';
 
 const { attribute, attributeValue, productAttribute } = models;
 class AttributeController {
@@ -9,16 +10,18 @@ class AttributeController {
      * @param {*} next
      */
     static async getAllAttributes(req, res, next) {
+        const helpers = new ModelHelpers(attribute);
         try {
-            const data = await attribute.findAll();
-            return res.status(200).json(data);
+            const data = await helpers.findMany();
+            return Response.response(res, 200, data);
         } catch (error) {
-            return res.status(500).json({
-                error: {
-                    status: 500,
-                    message: error.name,
-                },
-            });
+            return Response.errorResponse(
+                res,
+                '500',
+                'An Error Occured',
+                '200',
+                'example'
+            );
         }
     }
 
@@ -28,31 +31,35 @@ class AttributeController {
      * @param {*} res
      * @param {*} next
      */
-    static async getSingleAttribute(req, res) {
+    static async getSingleAttribute(req, res, next) {
         // eslint-disable-next-line camelcase
         const { attribute_id } = req.params;
+        const helpers = new ModelHelpers(attribute);
         try {
-            const data = await attribute.findOne({
-                where: { attribute_id: Number(attribute_id) },
+            const data = await helpers.findOne({
+                attribute_id: Number(attribute_id),
             });
+            // const data = await attribute.findOne({
+            //     where: { attribute_id: Number(attribute_id) },
+            // });
+
             if (!data) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'ATTR_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+                return Response.errorResponse(
+                    res,
+                    'CAT_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
+
             return res.status(200).json(data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred please review your inputs',
+                '500'
+            );
         }
     }
 
@@ -75,20 +82,19 @@ class AttributeController {
                 return res.status(404).json({
                     error: {
                         status: 404,
-                        code: 'ATTR_01',
+                        code: 'CAT_01',
                         message: "Don't exist attribute with this ID",
                     },
                 });
             }
             return res.status(200).json(data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred please review your inputs',
+                '500'
+            );
         }
     }
 
@@ -101,33 +107,34 @@ class AttributeController {
     static async getProductAttributes(req, res) {
         // Write code to get all attribute values for a product using the product id provided in the request param
         const { product_id } = req.params;
+        const helpers = new ModelHelpers(productAttribute);
         try {
-            const data = await productAttribute.findAll({
-                where: { product_id: Number(product_id) },
-                include: [
-                    {
-                        model: attributeValue,
-                    },
-                ],
-            });
+            const data = await helpers.findMany(
+                { product_id: Number(product_id) },
+                {
+                    include: [
+                        {
+                            model: attributeValue,
+                        },
+                    ],
+                }
+            );
             if (!data) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'PRD_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+                return Response.errorResponse(
+                    res,
+                    'PRD_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
             return res.status(200).json(data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred please review your inputs',
+                '500'
+            );
         }
     }
 }
