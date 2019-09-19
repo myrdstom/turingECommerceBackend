@@ -90,9 +90,48 @@ class CustomerController {
      */
     static async login(req, res, next) {
         // implement function to login to user account
-        return res.status(200).json({ message: 'this works' });
-    }
+        try {
+            const { email, password } = req.body;
+            const user = await Customer.findOne({
+                where: { email },
+            });
 
+            if (!user) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        code: 'USR_05',
+                        message: "The email doesn't exist.",
+                        field: 'email',
+                    },
+                });
+            }
+            const verifyPassword = bcrypt.compareSync(password, user.password);
+            if (!verifyPassword) {
+                return res.status(400).json({
+                    error: {
+                        status: 400,
+                        code: 'USR_01',
+                        message: 'Email or Password is invalid.',
+                        field: 'password',
+                    },
+                });
+            }
+            const token = jwt.sign(
+              { data: { customer_id: user.customer_id, name: user.name, email: user.email } },
+              process.env.JWT_KEY,
+              { expiresIn: '24h' },
+            );
+
+            return res.status(200).json({
+                customer: user,
+                accessToken: `Bearer ${token}`,
+                expires_in: '24h',
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
     /**
      * get customer profile data
      *
