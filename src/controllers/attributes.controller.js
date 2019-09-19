@@ -2,6 +2,10 @@ import models from '../database/models';
 import { ModelHelpers, Response } from '../helpers';
 
 const { attribute, attributeValue, productAttribute } = models;
+
+const attributeHelper = new ModelHelpers(attribute);
+const attributeValueHelper = new ModelHelpers(attributeValue);
+const productAttributeHelper = new ModelHelpers(productAttribute);
 class AttributeController {
     /**
      * This method get all attributes
@@ -10,17 +14,15 @@ class AttributeController {
      * @param {*} next
      */
     static async getAllAttributes(req, res, next) {
-        const helpers = new ModelHelpers(attribute);
         try {
-            const data = await helpers.findMany();
+            const data = await attributeHelper.findMany();
             return Response.response(res, 200, data);
         } catch (error) {
             return Response.errorResponse(
                 res,
-                '500',
+                undefined,
                 'An Error Occurred',
-                '200',
-                'example'
+                '500'
             );
         }
     }
@@ -34,9 +36,8 @@ class AttributeController {
     static async getSingleAttribute(req, res, next) {
         // eslint-disable-next-line camelcase
         const { attribute_id } = req.params;
-        const helpers = new ModelHelpers(attribute);
         try {
-            const data = await helpers.findOne({
+            const data = await attributeHelper.findOne({
                 attribute_id: Number(attribute_id),
             });
 
@@ -49,12 +50,12 @@ class AttributeController {
                 );
             }
 
-            return res.status(200).json(data);
+            return Response.response(res, 200, data);
         } catch (e) {
             return Response.errorResponse(
                 res,
                 undefined,
-                'An Error Occurred please review your inputs',
+                'An Error Occurred',
                 '500'
             );
         }
@@ -69,28 +70,27 @@ class AttributeController {
     static async getAttributeValues(req, res, next) {
         // Write code to get all attribute values for an attribute using the attribute id provided in the request param
         // This function takes the param: attribute_id
+        // eslint-disable-next-line camelcase
         const { attribute_id } = req.params;
-        const helpers = new ModelHelpers(attributeValue);
         try {
-            const data = await helpers.findOne({
+            const data = await attributeValueHelper.findMany({
                 attribute_id: Number(attribute_id),
             });
 
             if (data.length === 0) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'CAT_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+                return Response.errorResponse(
+                    res,
+                    'CAT_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
-            return res.status(200).json(data);
+            return Response.response(res, 200, data);
         } catch (e) {
             return Response.errorResponse(
                 res,
                 undefined,
-                'An Error Occurred please review your inputs',
+                'An Error Occurred please',
                 '500'
             );
         }
@@ -102,12 +102,11 @@ class AttributeController {
      * @param {*} res
      * @param {*} next
      */
-    static async getProductAttributes(req, res) {
+    static async getProductAttributes(req, res, next) {
         // Write code to get all attribute values for a product using the product id provided in the request param
         const { product_id } = req.params;
-        const helpers = new ModelHelpers(productAttribute);
         try {
-            const data = await helpers.findMany(
+            const data = await productAttributeHelper.findMany(
                 { product_id: Number(product_id) },
                 {
                     include: [
@@ -120,17 +119,17 @@ class AttributeController {
             if (data.length === 0) {
                 return Response.errorResponse(
                     res,
-                    'PRD_01',
+                    'CAT_01',
                     "Don't exist attribute with this ID",
                     404
                 );
             }
-            return res.status(200).json(data);
+            return Response.response(res, 200, data);
         } catch (e) {
             return Response.errorResponse(
                 res,
                 undefined,
-                'An Error Occurred please review your inputs',
+                'An Error Occurred',
                 '500'
             );
         }
