@@ -18,7 +18,7 @@ class AttributeController {
             return Response.errorResponse(
                 res,
                 '500',
-                'An Error Occured',
+                'An Error Occurred',
                 '200',
                 'example'
             );
@@ -39,11 +39,8 @@ class AttributeController {
             const data = await helpers.findOne({
                 attribute_id: Number(attribute_id),
             });
-            // const data = await attribute.findOne({
-            //     where: { attribute_id: Number(attribute_id) },
-            // });
 
-            if (!data) {
+            if (data.length === 0) {
                 return Response.errorResponse(
                     res,
                     'CAT_01',
@@ -73,12 +70,13 @@ class AttributeController {
         // Write code to get all attribute values for an attribute using the attribute id provided in the request param
         // This function takes the param: attribute_id
         const { attribute_id } = req.params;
+        const helpers = new ModelHelpers(attributeValue);
         try {
-            const data = await attributeValue.findAll({
-                where: { attribute_id: Number(attribute_id) },
+            const data = await helpers.findOne({
+                attribute_id: Number(attribute_id),
             });
 
-            if (!data) {
+            if (data.length === 0) {
                 return res.status(404).json({
                     error: {
                         status: 404,
@@ -119,7 +117,7 @@ class AttributeController {
                     ],
                 }
             );
-            if (!data) {
+            if (data.length === 0) {
                 return Response.errorResponse(
                     res,
                     'PRD_01',
