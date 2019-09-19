@@ -43,5 +43,7 @@ node_modules
 dist/
 .vscode
 .idea/
+
+#npm
 package-lock.json
 yarn.lock

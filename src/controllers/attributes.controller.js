@@ -1,6 +1,11 @@
 import models from '../database/models';
+import { ModelHelpers, Response } from '../helpers';
 
 const { attribute, attributeValue, productAttribute } = models;
+
+const attributeHelper = new ModelHelpers(attribute);
+const attributeValueHelper = new ModelHelpers(attributeValue);
+const productAttributeHelper = new ModelHelpers(productAttribute);
 class AttributeController {
     /**
      * This method get all attributes
@@ -10,15 +15,15 @@ class AttributeController {
      */
     static async getAllAttributes(req, res, next) {
         try {
-            const data = await attribute.findAll();
-            return res.status(200).json(data);
+            const data = await attributeHelper.findMany();
+            return Response.response(res, 200, data);
         } catch (error) {
-            return res.status(500).json({
-                error: {
-                    status: 500,
-                    message: error.name,
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred',
+                '500'
+            );
         }
     }
 
@@ -28,31 +33,31 @@ class AttributeController {
      * @param {*} res
      * @param {*} next
      */
-    static async getSingleAttribute(req, res) {
+    static async getSingleAttribute(req, res, next) {
         // eslint-disable-next-line camelcase
         const { attribute_id } = req.params;
         try {
-            const data = await attribute.findOne({
-                where: { attribute_id: Number(attribute_id) },
+            const data = await attributeHelper.findOne({
+                attribute_id: Number(attribute_id),
             });
-            if (!data) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'ATTR_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+
+            if (data.length === 0) {
+                return Response.errorResponse(
+                    res,
+                    'CAT_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
-            return res.status(200).json(data);
+
+            return Response.response(res, 200, data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred',
+                '500'
+            );
         }
     }
 
@@ -65,30 +70,29 @@ class AttributeController {
     static async getAttributeValues(req, res, next) {
         // Write code to get all attribute values for an attribute using the attribute id provided in the request param
         // This function takes the param: attribute_id
+        // eslint-disable-next-line camelcase
         const { attribute_id } = req.params;
         try {
-            const data = await attributeValue.findAll({
-                where: { attribute_id: Number(attribute_id) },
+            const data = await attributeValueHelper.findMany({
+                attribute_id: Number(attribute_id),
             });
 
-            if (!data) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'ATTR_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+            if (data.length === 0) {
+                return Response.errorResponse(
+                    res,
+                    'CAT_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
-            return res.status(200).json(data);
+            return Response.response(res, 200, data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred please',
+                '500'
+            );
         }
     }
 
@@ -98,36 +102,36 @@ class AttributeController {
      * @param {*} res
      * @param {*} next
      */
-    static async getProductAttributes(req, res) {
+    static async getProductAttributes(req, res, next) {
         // Write code to get all attribute values for a product using the product id provided in the request param
         const { product_id } = req.params;
         try {
-            const data = await productAttribute.findAll({
-                where: { product_id: Number(product_id) },
-                include: [
-                    {
-                        model: attributeValue,
-                    },
-                ],
-            });
-            if (!data) {
-                return res.status(404).json({
-                    error: {
-                        status: 404,
-                        code: 'PRD_01',
-                        message: "Don't exist attribute with this ID",
-                    },
-                });
+            const data = await productAttributeHelper.findMany(
+                { product_id: Number(product_id) },
+                {
+                    include: [
+                        {
+                            model: attributeValue,
+                        },
+                    ],
+                }
+            );
+            if (data.length === 0) {
+                return Response.errorResponse(
+                    res,
+                    'CAT_01',
+                    "Don't exist attribute with this ID",
+                    404
+                );
             }
-            return res.status(200).json(data);
+            return Response.response(res, 200, data);
         } catch (e) {
-            return res.status(400).json({
-                error: {
-                    status: 400,
-                    code: 'ATTR_02',
-                    message: 'The ID is not a number.',
-                },
-            });
+            return Response.errorResponse(
+                res,
+                undefined,
+                'An Error Occurred',
+                '500'
+            );
         }
     }
 }

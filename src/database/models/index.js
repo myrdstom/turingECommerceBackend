@@ -24,7 +24,14 @@ if (config.use_env_variable) {
 const db = {
     attribute: sequelize.import('./attribute'),
     attributeValue: sequelize.import('./attributeValue'),
+    category: sequelize.import('./category'),
+    category: sequelize.import('./category'),
+    category: sequelize.import('./category'),
+    category: sequelize.import('./category'),
+    category: sequelize.import('./category'),
+    category: sequelize.import('./category'),
     productAttribute: sequelize.import('./productAttribute'),
+
 };
 
 fs.readdirSync(__dirname)
