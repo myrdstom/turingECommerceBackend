@@ -25,13 +25,16 @@ const db = {
     attribute: sequelize.import('./attribute'),
     attributeValue: sequelize.import('./attributeValue'),
     category: sequelize.import('./category'),
-    category: sequelize.import('./category'),
-    category: sequelize.import('./category'),
-    category: sequelize.import('./category'),
-    category: sequelize.import('./category'),
-    category: sequelize.import('./category'),
+    department: sequelize.import('./department'),
+    order: sequelize.import('./order'),
+    orderDetail: sequelize.import('./orderDetail'),
+    product: sequelize.import('./product'),
     productAttribute: sequelize.import('./productAttribute'),
-
+    productCategory: sequelize.import('./productCategory'),
+    shipping: sequelize.import('./shipping'),
+    shippingRegion: sequelize.import('./shippingRegion'),
+    shoppingCart: sequelize.import('./shoppingCart'),
+    tax: sequelize.import('./tax'),
 };
 
 fs.readdirSync(__dirname)
