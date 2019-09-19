@@ -6,6 +6,10 @@ import CustomerController from '../../controllers/customer.controller';
 const router = Router();
 router.post(
   '/customers',
+  CustomerController.create
+);
+router.post(
+  '/customers/creditCard',
   CustomerController.updateCreditCard
 );
 router.post('/customers/login',  CustomerController.login);
