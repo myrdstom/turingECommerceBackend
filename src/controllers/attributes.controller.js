@@ -1,5 +1,6 @@
 import models from '../database/models';
 import { Response } from '../helpers';
+import flattenObject from '../util/utils';
 
 const { attribute, attributeValue, productAttribute } = models;
 
@@ -32,10 +33,10 @@ class AttributeController {
      */
     static async getSingleAttribute(req, res, next) {
         // eslint-disable-next-line camelcase
-        const { attribute_id } = req.params;
+        const { attributeId } = req.params;
         try {
             const data = await attribute.findAll({
-                where: { attribute_id: Number(attribute_id) },
+                where: { attribute_id: Number(attributeId) },
             });
 
             if (data.length === 0) {
@@ -68,10 +69,10 @@ class AttributeController {
         // Write code to get all attribute values for an attribute using the attribute id provided in the request param
         // This function takes the param: attribute_id
         // eslint-disable-next-line camelcase
-        const { attribute_id } = req.params;
+        const { attributeId } = req.params;
         try {
             const data = await attributeValue.findAll({
-                where: { attribute_id: Number(attribute_id) },
+                where: { attribute_id: Number(attributeId) },
             });
 
             if (data.length === 0) {
@@ -101,16 +102,28 @@ class AttributeController {
      */
     static async getProductAttributes(req, res, next) {
         // Write code to get all attribute values for a product using the product id provided in the request param
-        const { product_id } = req.params;
+        const { productId } = req.params;
         try {
-            const data = await productAttribute.findAll({
-                where: { product_id: Number(product_id) },
+            let data = await productAttribute.findAll({
+                where: { product_id: Number(productId) },
+                attributes: ['attribute_value_id'],
                 include: [
                     {
                         model: attributeValue,
+                        attributes: [['value', 'attribute_value']],
+                        include: [
+                            {
+                                model: attribute,
+                                as: 'attribute_type',
+                                attributes: [['name', 'attribute_name']],
+                            },
+                        ],
                     },
                 ],
             });
+
+            data = data.map(newData => flattenObject(newData.toJSON()));
+
             if (data.length === 0) {
                 return Response.errorResponse(
                     res,
