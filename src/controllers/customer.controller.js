@@ -12,9 +12,11 @@
  *  NB: Check the BACKEND CHALLENGE TEMPLATE DOCUMENTATION in the readme of this repository to see our recommended
  *  endpoints, request body/param, and response object for each of these method
  */
+import { Customer } from '../database/models';
+const { validationResult } = require('express-validator/check');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-import { Customer } from '../database/models';
 
 /**
  *
@@ -91,11 +93,16 @@ class CustomerController {
     static async login(req, res, next) {
         // implement function to login to user account
         try {
+
+            const errors = validationResult(req);
             const { email, password } = req.body;
             const user = await Customer.findOne({
                 where: { email },
             });
-
+            if (!errors.isEmpty()) {
+                res.status(422).json({ errors: errors.array() });
+                return;
+            }
             if (!user) {
                 return res.status(400).json({
                     error: {
@@ -106,21 +113,30 @@ class CustomerController {
                     },
                 });
             }
+            // if (!errors.isEmpty()) {
+            //     return res.status(422).json({ errors: errors.array() });
+            // }
             const verifyPassword = bcrypt.compareSync(password, user.password);
             if (!verifyPassword) {
                 return res.status(400).json({
                     error: {
                         status: 400,
                         code: 'USR_01',
-                        message: 'Email or Password is invalid.',
+                        message: 'Invalid password, please try again.',
                         field: 'password',
                     },
                 });
             }
             const token = jwt.sign(
-              { data: { customer_id: user.customer_id, name: user.name, email: user.email } },
-              process.env.JWT_KEY,
-              { expiresIn: '24h' },
+                {
+                    data: {
+                        customer_id: user.customer_id,
+                        name: user.name,
+                        email: user.email,
+                    },
+                },
+                process.env.JWT_KEY,
+                { expiresIn: '24h' }
             );
 
             return res.status(200).json({
